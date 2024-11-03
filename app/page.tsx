@@ -1,12 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import Link from "next/link";
-import { Fingerprint, MountainIcon } from "lucide-react";
 import { Filters } from "@/components/directory/filters";
 import {
   Pagination,
@@ -18,30 +10,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ItemsDisplay } from "@/components/directory/items-display";
-import { ModeToggle } from "@/components/theme/theme-dropdown";
-
-const faqs = [
-  {
-    question: "What is APY?",
-    answer:
-      "APY stands for Annual Percentage Yield. It's the real rate of return earned on a savings deposit or investment taking into account the effect of compounding interest.",
-  },
-  {
-    question: "How does APY List find the best rates?",
-    answer:
-      "Our AI-powered system continuously scans trusted financial platforms and institutions to find and update the most competitive APY rates in real-time.",
-  },
-  {
-    question: "Is APY List free to use?",
-    answer:
-      "Yes, our basic service is free. We also offer premium features for users who want more advanced filtering and alert options.",
-  },
-  {
-    question: "How often are the APY rates updated?",
-    answer:
-      "Our system updates rates in real-time as soon as new information becomes available from our sources.",
-  },
-];
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
+import FAQ from "@/components/landing/faq";
 
 interface Pool {
   symbol: string;
@@ -176,34 +147,7 @@ export default async function Home({
 
   return (
     <div className="flex flex-col min-h-screen max-w-6xl mx-auto">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" href="#">
-          <MountainIcon className="h-6 w-6" />
-          <span className="sr-only">APY List</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
-            Pricing
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
-            FAQ
-          </Link>
-          <ModeToggle />
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
-            <Fingerprint className="h-6 w-6" />
-            Login
-          </Link>
-        </nav>
-      </header>
+      <Header />
       <main className="relative">
         <div className="flex justify-between items-center mb-4">
           <Filters data={filteredAndSortedData} />
@@ -328,42 +272,9 @@ export default async function Home({
             </Card>
           </div>
         </section>
-        <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto">
-          <h3 className="text-6xl font-bold text-center">
-            Start Finding the Best APY Rates with AI Assistance
-          </h3>
-        </section>
-        <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto">
-          <h3 className="text-6xl font-bold text-center">
-            Frequently Asked Questions (FAQ)
-          </h3>
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full max-w-2xl mx-auto"
-          >
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger>{faq.question}</AccordionTrigger>
-                <AccordionContent>{faq.answer}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </section>
+        <FAQ />
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          © 2024 APY List. All rights reserved.
-        </p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -9,8 +9,8 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,12 +35,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ViewToggle } from "@/components/directory/view-toggle";
 import { FilteredItem } from "@/types/data";
 import { DownloadButton } from "@/components/directory/download-button";
 import { ATTRIBUTES, CATEGORIES, CHAINS } from "@/data/filters-data";
+
 // Define the form schema with Zod
 const filterFormSchema = z.object({
   search: z.string().optional(),
@@ -48,7 +49,6 @@ const filterFormSchema = z.object({
   maxApy: z.number().min(0).max(15),
   minTvl: z.number().min(0),
   maxTvl: z.number().min(0),
-  minDeposit: z.number().min(0),
   risk: z.array(z.enum(["low", "medium", "high", "very high"])),
   attributes: z.array(z.enum(ATTRIBUTES as [string, ...string[]])),
   categories: z.array(z.enum(CATEGORIES as [string, ...string[]])),
@@ -72,10 +72,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
       maxApy: Number(searchParams.get("maxApy")) || 15,
       minTvl: Number(searchParams.get("minTvl")) || 0,
       maxTvl: Number(searchParams.get("maxTvl")) || 0,
-      minDeposit: Number(searchParams.get("minDeposit")) || 0,
-      risk: searchParams.getAll("risk").length
-        ? (searchParams.getAll("risk") as FilterFormValues["risk"])
-        : ["low", "medium", "high", "very high"],
+      risk: searchParams.getAll("risk") as FilterFormValues["risk"] || [],
       attributes:
         (searchParams.getAll("attributes") as FilterFormValues["attributes"]) ||
         [],
@@ -114,13 +111,12 @@ export function Filters({ data }: { data: FilteredItem[] }) {
       maxApy: 15,
       minTvl: 0,
       maxTvl: 0,
-      minDeposit: 0,
-      risk: ["low", "medium", "high", "very high"],
-      attributes: ATTRIBUTES as [string, ...string[]],
-      categories: CATEGORIES as [string, ...string[]],
+      risk: [],
+      attributes: [],
+      categories: [],
       sortBy: "apy",
       sortOrder: "desc",
-      chains: CHAINS as [string, ...string[]],
+      chains: [],
     });
     router.push("/");
   };
@@ -130,391 +126,500 @@ export function Filters({ data }: { data: FilteredItem[] }) {
       <Form {...form}>
         <form
           onChange={form.handleSubmit(onSubmit)}
-          className="flex items-center gap-4"
+          className="flex flex-col gap-4"
         >
           <FormField
             control={form.control}
             name="search"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Search Tokens</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Search by token name..."
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder="Search by token name..."
+                      {...field}
+                      className="pl-8"
+                    />
+                  </div>
                 </FormControl>
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="minApy"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Min APY</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="maxApy"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max APY</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="minTvl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Min TVL</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="maxTvl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max TVL</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="minDeposit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Minimum Deposit</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="risk"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Risk Level</FormLabel>
-                <div className="flex flex-col space-y-2 mt-1">
-                  {["low", "medium", "high", "very high"].map((level) => (
-                    <div key={level} className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={field.value.includes(
-                          level as "low" | "medium" | "high" | "very high"
-                        )}
-                        id={level}
-                        name={level}
-                        onCheckedChange={(checked) => {
-                          const newValue = checked
-                            ? [
-                                ...field.value,
-                                level as
-                                  | "low"
-                                  | "medium"
-                                  | "high"
-                                  | "very high",
-                              ]
-                            : field.value.filter((v) => v !== level);
-                          field.onChange(newValue);
-                        }}
-                      />
-                      <FormLabel className="capitalize" htmlFor={level}>
-                        {level}
-                      </FormLabel>
-                    </div>
-                  ))}
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="attributes"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Attributes</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value?.length && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value?.length
-                          ? `${field.value.length} selected`
-                          : "Select attributes"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search attributes..." />
-                      <CommandList>
-                        <CommandEmpty>No attribute found.</CommandEmpty>
-                        <CommandGroup className="max-h-64 overflow-auto">
-                          {ATTRIBUTES.map((attribute) => (
-                            <CommandItem
-                              value={attribute}
-                              key={attribute}
-                              onSelect={() => {
-                                const newValue = field.value?.includes(
-                                  attribute
-                                )
-                                  ? field.value.filter((v) => v !== attribute)
-                                  : [...(field.value || []), attribute];
-                                field.onChange(newValue);
-                              }}
-                              className="flex items-center justify-between"
-                            >
-                              {attribute}
-                              <Checkbox
-                                className="h-4 w-4"
-                                checked={field.value?.includes(attribute)}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="categories"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Categories</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value?.length && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value?.length
-                          ? `${field.value.length} selected`
-                          : "Select categories"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search categories..." />
-                      <CommandList>
-                        <CommandEmpty>No category found.</CommandEmpty>
-                        <CommandGroup className="max-h-64 overflow-auto">
-                          {CATEGORIES.map((category) => (
-                            <CommandItem
-                              value={category}
-                              key={category}
-                              onSelect={() => {
-                                const currentValue = field.value ?? [];
-                                const newValue = currentValue.includes(category)
-                                  ? currentValue.filter((v) => v !== category)
-                                  : [...currentValue, category];
-                                field.onChange(newValue);
-                              }}
-                              className="flex items-center justify-between"
-                            >
-                              {category}
-                              <Checkbox
-                                className="h-4 w-4"
-                                checked={field.value?.includes(category)}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sortBy"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sort By</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+          <div className="flex items-center gap-4 mb-4">
+            <FormField
+              control={form.control}
+              name="minApy"
+              render={({ field }) => (
+                <FormItem>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-[200px] justify-between">
+                          APY
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="flex flex-col gap-2">
+                          <FormItem>
+                            <FormLabel>Minimum APY</FormLabel>
+                            <FormControl>
+                              <Input
+                                id="minApy"
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                          </FormItem>
+                          <FormField
+                            control={form.control}
+                            name="maxApy"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Maximum APY</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    id="maxApy"
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="apy">APY</SelectItem>
-                    <SelectItem value="tvl">TVL</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="sortOrder"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sort Order</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+            <FormField
+              control={form.control}
+              name="minTvl"
+              render={({ field }) => (
+                <FormItem>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sort order" />
-                    </SelectTrigger>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-[200px] justify-between">
+                          TVL
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="flex flex-col gap-2">
+                          <FormItem>
+                            <FormLabel>Minimum TVL</FormLabel>
+                            <FormControl>
+                              <Input
+                                id="minTvl"
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                          </FormItem>
+                          <FormField
+                            control={form.control}
+                            name="maxTvl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Maximum TVL</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    id="maxTvl"
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="desc">Descending</SelectItem>
-                    <SelectItem value="asc">Ascending</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="chains"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Chains</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value?.length && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value?.length
-                          ? `${field.value.length} selected`
-                          : "Select chains"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0">
-                    <Command>
-                      <div className="flex items-center gap-2 p-2 border-b">
-                        <CommandInput placeholder="Search chains..." />
+            <FormField
+              control={form.control}
+              name="risk"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
                         <Button
                           variant="outline"
-                          size="sm"
-                          onClick={() => field.onChange([])}
-                          className="h-8"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value?.length && "text-muted-foreground"
+                          )}
                         >
-                          Clear
+                          {field.value?.length
+                            ? `${field.value.length} selected`
+                            : "Risk Level"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <div className="flex flex-col gap-2 p-2 border-b">
+                          <CommandInput placeholder="Search risk levels..." />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange([])}
+                              className="h-8"
+                            >
+                              Clear
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange(["low", "medium", "high", "very high"])}
+                              className="h-8"
+                            >
+                              Toggle all
+                            </Button>
+                          </div>
+                        </div>
+                        <CommandList>
+                          <CommandEmpty>No risk level found.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {["low", "medium", "high", "very high"].map(
+                              (level) => (
+                                <CommandItem
+                                  value={level}
+                                  key={level}
+                                  onSelect={() => {
+                                    const currentValue = field.value ?? [];
+                                    const newValue = currentValue.includes(level as "low" | "medium" | "high" | "very high")
+                                      ? currentValue.filter((v) => v !== level)
+                                      : [...currentValue, level as "low" | "medium" | "high" | "very high"];
+                                    field.onChange(newValue);
+                                  }}
+                                  className="flex items-center justify-between"
+                                >
+                                  <span className="capitalize">{level}</span>
+                                  <Checkbox
+                                    className="h-4 w-4"
+                                    checked={field.value?.includes(level as "low" | "medium" | "high" | "very high")}
+                                  />
+                                </CommandItem>
+                              )
+                            )}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="attributes"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
                         <Button
                           variant="outline"
-                          size="sm"
-                          onClick={() => field.onChange(CHAINS)}
-                          className="h-8"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value?.length && "text-muted-foreground"
+                          )}
                         >
-                          All
+                          {field.value?.length
+                            ? `${field.value.length} selected`
+                            : "Attributes"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
-                      </div>
-                      <CommandList>
-                        <CommandEmpty>No chain found.</CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-auto">
-                          {CHAINS.map((chain) => (
-                            <CommandItem
-                              value={chain}
-                              key={chain}
-                              onSelect={() => {
-                                const newValue = field.value?.includes(chain)
-                                  ? field.value.filter((v) => v !== chain)
-                                  : [...(field.value || []), chain];
-                                field.onChange(newValue);
-                              }}
-                              className="flex items-center justify-between"
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <div className="flex flex-col gap-2 p-2 border-b">
+                          <CommandInput placeholder="Search attributes..." />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange([])}
+                              className="h-8"
                             >
-                              {chain}
-                              <Checkbox
-                                className="h-4 w-4"
-                                checked={field.value?.includes(chain)}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                              Clear
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange(ATTRIBUTES)}
+                              className="h-8"
+                            >
+                              Toggle all
+                            </Button>
+                          </div>
+                        </div>
+                        <CommandList>
+                          <CommandEmpty>No attribute found.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {ATTRIBUTES.map((attribute) => (
+                              <CommandItem
+                                value={attribute}
+                                key={attribute}
+                                onSelect={() => {
+                                  const newValue = field.value?.includes(
+                                    attribute
+                                  )
+                                    ? field.value.filter((v) => v !== attribute)
+                                    : [...(field.value || []), attribute];
+                                  field.onChange(newValue);
+                                }}
+                                className="flex items-center justify-between"
+                              >
+                                {attribute}
+                                <Checkbox
+                                  className="h-4 w-4"
+                                  checked={field.value?.includes(attribute)}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categories"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value?.length && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value?.length
+                            ? `${field.value.length} selected`
+                            : "Categories"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <div className="flex flex-col gap-2 p-2 border-b">
+                          <CommandInput placeholder="Search categories..." />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange([])}
+                              className="h-8"
+                            >
+                              Clear
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange(CATEGORIES)}
+                              className="h-8"
+                            >
+                              Toggle all
+                            </Button>
+                          </div>
+                        </div>
+                        <CommandList>
+                          <CommandEmpty>No category found.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {CATEGORIES.map((category) => (
+                              <CommandItem
+                                value={category}
+                                key={category}
+                                onSelect={() => {
+                                  const currentValue = field.value ?? [];
+                                  const newValue = currentValue.includes(
+                                    category
+                                  )
+                                    ? currentValue.filter((v) => v !== category)
+                                    : [...currentValue, category];
+                                  field.onChange(newValue);
+                                }}
+                                className="flex items-center justify-between"
+                              >
+                                {category}
+                                <Checkbox
+                                  className="h-4 w-4"
+                                  checked={field.value?.includes(category)}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sortBy"
+              render={({ field }) => (
+                <FormItem>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="apy">APY</SelectItem>
+                      <SelectItem value="tvl">TVL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sortOrder"
+              render={({ field }) => (
+                <FormItem>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sort order" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="desc">Descending</SelectItem>
+                      <SelectItem value="asc">Ascending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="chains"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value?.length && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value?.length
+                            ? `${field.value.length} selected`
+                            : "Chains"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <div className="flex flex-col gap-2 p-2 border-b">
+                          <CommandInput placeholder="Search chains..." />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange([])}
+                              className="h-8"
+                            >
+                              Clear
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => field.onChange(CHAINS)}
+                              className="h-8"
+                            >
+                              Toggle all
+                            </Button>
+                          </div>
+                        </div>
+                        <CommandList>
+                          <CommandEmpty>No chain found.</CommandEmpty>
+                          <CommandGroup className="max-h-[300px] overflow-auto">
+                            {CHAINS.map((chain) => (
+                              <CommandItem
+                                value={chain}
+                                key={chain}
+                                onSelect={() => {
+                                  const newValue = field.value?.includes(chain)
+                                    ? field.value.filter((v) => v !== chain)
+                                    : [...(field.value || []), chain];
+                                  field.onChange(newValue);
+                                }}
+                                className="flex items-center justify-between"
+                              >
+                                {chain}
+                                <Checkbox
+                                  className="h-4 w-4"
+                                  checked={field.value?.includes(chain)}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+          </div>
         </form>
       </Form>
-      <div className="flex justify-between items-center mb-4">
-        <Button variant="outline" onClick={resetFilters} type="button">
+      <div className="flex items-center justify-end w-full gap-4 mb-4">
+        <Button onClick={resetFilters} type="button">
           Reset Filters
         </Button>
         <DownloadButton data={data} />
