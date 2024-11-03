@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { MountainIcon } from "lucide-react";
+import { Fingerprint, MountainIcon } from "lucide-react";
 import { Filters } from "@/components/directory/filters";
 import {
   Pagination,
@@ -17,8 +17,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { LayoutGrid, List } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ItemsDisplay } from "@/components/directory/items-display";
+import { ModeToggle } from "@/components/theme/theme-dropdown";
 
 const faqs = [
   {
@@ -66,8 +66,7 @@ async function getDefiRates() {
 
     const data = await res.json();
 
-    const limitedData = data.data.slice(0, 100);
-    console.log(limitedData);
+    const limitedData = data.data;
 
     const transformedData = limitedData.map((pool: Pool, index: number) => ({
       id: index + 1,
@@ -132,7 +131,6 @@ export default async function Home({
     sortBy?: string;
     sortOrder?: string;
     page?: string;
-    view?: string;
   };
 }) {
   const allRatesData = await getAllRates();
@@ -176,18 +174,8 @@ export default async function Home({
     currentPage * itemsPerPage
   );
 
-  // Get view mode from URL params, default to grid
-  const viewMode = searchParams.view === "list" ? "list" : "grid";
-
-  // Helper function to preserve existing search params when changing view
-  const getViewToggleHref = (newView: string) => {
-    const params = new URLSearchParams(searchParams as Record<string, string>);
-    params.set("view", newView);
-    return `?${params.toString()}`;
-  };
-
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen max-w-6xl mx-auto">
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link className="flex items-center justify-center" href="#">
           <MountainIcon className="h-6 w-6" />
@@ -198,13 +186,7 @@ export default async function Home({
             className="text-sm font-medium hover:underline underline-offset-4"
             href="#"
           >
-            Features
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
-            How It Works
+            Pricing
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -212,194 +194,97 @@ export default async function Home({
           >
             FAQ
           </Link>
+          <ModeToggle />
+          <Link
+            className="text-sm font-medium hover:underline underline-offset-4"
+            href="#"
+          >
+            <Fingerprint className="h-6 w-6" />
+            Login
+          </Link>
         </nav>
       </header>
       <main className="relative">
-        <div className="">
-          <div className="flex justify-between items-center mb-4">
-            <Filters />
-            <div className="flex gap-2">
-              <Link
-                href={getViewToggleHref("grid")}
-                className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  viewMode === "grid"
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                } h-10 w-10`}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Link>
-              <Link
-                href={getViewToggleHref("list")}
-                className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  viewMode === "list"
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                } h-10 w-10`}
-              >
-                <List className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <Filters data={filteredAndSortedData} />
+        </div>
 
-          {viewMode === "grid" ? (
-            // Grid View
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {currentItems.map((item: FilteredItem) => (
-                <Card key={item.id}>
-                  <CardHeader className="flex flex-row items-center gap-2">
-                    <div className="flex gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src={`https://icons.llamao.fi/icons/chains/rsz_${item.chain.toLowerCase()}?w=48&h=48`}
-                          alt={`${item.chain} icon`}
-                        />
-                        <AvatarFallback>{item.chain.slice(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src={`https://icons.llamao.fi/icons/protocols/${item.project.toLowerCase()}?w=48&h=48`}
-                          alt={`${item.project} icon`}
-                        />
-                        <AvatarFallback>{item.project.slice(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <CardTitle>{item.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-2xl font-bold">{item.apy}% APY</p>
-                    <p className="text-sm text-gray-500">Provider: {item.provider}</p>
-                    <p className="text-sm text-gray-500">
-                      Type: <span className="capitalize">{item.type}</span>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Risk: <span className="capitalize">{item.risk}</span>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      TVL: ${(item.tvlUsd / 1000000).toFixed(2)}M
-                    </p>
-                    <p className="text-sm text-gray-500">Chain: {item.chain}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            // List View
-            <div className="flex flex-col gap-2">
-              {currentItems.map((item: FilteredItem) => (
-                <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="flex gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage 
-                        src={`https://icons.llamao.fi/icons/chains/rsz_${item.chain.toLowerCase()}?w=48&h=48`}
-                        alt={`${item.chain} icon`}
-                      />
-                      <AvatarFallback>{item.chain.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage 
-                        src={`https://icons.llamao.fi/icons/protocols/${item.project.toLowerCase()}?w=48&h=48`}
-                        alt={`${item.project} icon`}
-                      />
-                      <AvatarFallback>{item.project.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold">{item.name}</h3>
-                    <p className="text-sm text-gray-500">{item.provider}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold">{item.apy}% APY</p>
-                    <p className="text-sm text-gray-500">
-                      TVL: ${(item.tvlUsd / 1000000).toFixed(2)}M
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm">
-                      Risk: <span className="capitalize">{item.risk}</span>
-                    </p>
-                    <p className="text-sm">Chain: {item.chain}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <ItemsDisplay items={currentItems} />
 
-          <div className="mt-8 mb-16">
-            <Pagination>
-              <PaginationContent>
+        <div className="mt-8 mb-16">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                {currentPage > 1 ? (
+                  <PaginationPrevious href={`?page=${currentPage - 1}`} />
+                ) : (
+                  <PaginationPrevious
+                    href={`?page=1`}
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+
+              {currentPage > 2 && (
                 <PaginationItem>
-                  {currentPage > 1 ? (
-                    <PaginationPrevious href={`?page=${currentPage - 1}`} />
-                  ) : (
-                    <PaginationPrevious
-                      href={`?page=1`}
-                      className="pointer-events-none opacity-50"
-                    />
-                  )}
+                  <PaginationLink href={`?page=1`}>1</PaginationLink>
                 </PaginationItem>
+              )}
 
-                {currentPage > 2 && (
-                  <PaginationItem>
-                    <PaginationLink href={`?page=1`}>1</PaginationLink>
-                  </PaginationItem>
-                )}
+              {currentPage > 3 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
 
-                {currentPage > 3 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-
-                {[...Array(3)].map((_, i) => {
-                  const pageNumber = currentPage - 1 + i;
-                  if (pageNumber <= 0 || pageNumber > totalPages) return null;
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        href={`?page=${pageNumber}`}
-                        isActive={currentPage === pageNumber}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
-
-                {currentPage < totalPages - 2 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-
-                {currentPage < totalPages - 1 && (
-                  <PaginationItem>
-                    <PaginationLink href={`?page=${totalPages}`}>
-                      {totalPages}
+              {[...Array(3)].map((_, i) => {
+                const pageNumber = currentPage - 1 + i;
+                if (pageNumber <= 0 || pageNumber > totalPages) return null;
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href={`?page=${pageNumber}`}
+                      isActive={currentPage === pageNumber}
+                    >
+                      {pageNumber}
                     </PaginationLink>
                   </PaginationItem>
-                )}
+                );
+              })}
 
+              {currentPage < totalPages - 2 && (
                 <PaginationItem>
-                  {currentPage < totalPages ? (
-                    <PaginationNext href={`?page=${currentPage + 1}`} />
-                  ) : (
-                    <PaginationNext
-                      href={`?page=${totalPages}`}
-                      className="pointer-events-none opacity-50"
-                    />
-                  )}
+                  <PaginationEllipsis />
                 </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+              )}
 
-          {currentItems.length === 0 && (
-            <p className="text-center text-gray-500 mt-4">
-              No results found. Try adjusting your filters.
-            </p>
-          )}
+              {currentPage < totalPages - 1 && (
+                <PaginationItem>
+                  <PaginationLink href={`?page=${totalPages}`}>
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+
+              <PaginationItem>
+                {currentPage < totalPages ? (
+                  <PaginationNext href={`?page=${currentPage + 1}`} />
+                ) : (
+                  <PaginationNext
+                    href={`?page=${totalPages}`}
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
+
+        {currentItems.length === 0 && (
+          <p className="text-center text-gray-500 mt-4">
+            No results found. Try adjusting your filters.
+          </p>
+        )}
 
         <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto">
           <h3 className="text-4xl font-bold">How APY List Works</h3>
