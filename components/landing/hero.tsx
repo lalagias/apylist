@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Hero() {
   return (
@@ -30,11 +31,28 @@ export default function Hero() {
 
       {/* Social proof */}
       <div className="mt-12 flex flex-col items-center">
-        <div className="flex -space-x-4 mb-3">
-          {/* Add user avatars or protocol logos here */}
-          <div className="w-10 h-10 rounded-full bg-gray-300"></div>
-          <div className="w-10 h-10 rounded-full bg-gray-400"></div>
-          <div className="w-10 h-10 rounded-full bg-gray-500"></div>
+        <div className="flex -space-x-2 mb-3">
+          <Avatar className="border-2 border-border bg-background">
+            <AvatarImage
+              src="/assets/logos/bitcoin-btc-logo.png"
+              alt="Bitcoin logo"
+            />
+            <AvatarFallback>CP</AvatarFallback>
+          </Avatar>
+          <Avatar className="border-2 border-border bg-background">
+            <AvatarImage
+              src="/assets/logos/ethereum-eth-logo.png"
+              alt="Ethereum logo"
+            />
+            <AvatarFallback>CP</AvatarFallback>
+          </Avatar>
+          <Avatar className="border-2 border-border bg-background">
+            <AvatarImage
+              src="/assets/logos/solana-sol-logo.png"
+              alt="Solana icon"
+            />
+            <AvatarFallback>CP</AvatarFallback>
+          </Avatar>
         </div>
         <p className="text-gray-600">
           Tracking <span className="font-semibold">$500M+</span> in TVL across{" "}

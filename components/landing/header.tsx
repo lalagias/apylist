@@ -35,6 +35,12 @@ export default function Header() {
           >
             FAQ
           </Link>
+          <Link
+            href="/blog"
+            className="text-sm font-semibold leading-6 text-foreground"
+          >
+            Blog
+          </Link>
         </div>
 
         {/* Mobile menu */}
@@ -62,6 +68,12 @@ export default function Header() {
                   className="text-sm font-semibold leading-6 text-foreground"
                 >
                   FAQ
+                </Link>
+                <Link
+                  href="/blog"
+                  className="text-sm font-semibold leading-6 text-foreground"
+                >
+                  Blog
                 </Link>
                 <Link
                   href="/login"

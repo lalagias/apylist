@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
 
           {/* Social Links */}
-          <div>
+          {/* <div>
             <h3 className="font-semibold mb-4">Connect</h3>
             <ul className="space-y-2">
               <li>
@@ -67,7 +67,7 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
       </div>
 

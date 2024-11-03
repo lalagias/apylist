@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
@@ -9,8 +9,8 @@ export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
 
   const subscriptionPrice = {
-    monthly: 9,
-    annual: 45, // Includes 2 months free
+    monthly: 7.99,
+    annual: 79.99, // Doesn't include 2 months free
   };
 
   return (
@@ -36,9 +36,9 @@ export default function Pricing() {
       <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
         {/* Subscription Plan */}
         <div className="rounded-lg border p-8 shadow-sm">
-          <h3 className="text-2xl font-bold">Pro Staker</h3>
+          <h3 className="text-2xl font-bold">Subscription plan</h3>
           <p className="text-gray-600 mt-2">
-            Perfect for active crypto investors
+            Perfect for new crypto investors
           </p>
           <div className="mt-4 text-4xl font-bold">
             ${isAnnual ? subscriptionPrice.annual : subscriptionPrice.monthly}
@@ -52,19 +52,23 @@ export default function Pricing() {
           <ul className="mt-8 space-y-4">
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Access to all supported tokens
+              Full access to all premium features
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Real-time staking analytics
+              Advanced filtering & project insights
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Auto-compound rewards
+              AI risk & prediction analysis
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Priority support
+              Data export capabilities
+            </li>
+            <li className="flex items-center gap-3">
+              <CheckCircle className="text-green-500 h-5 w-5" />
+              Early access to new features
             </li>
           </ul>
         </div>
@@ -79,7 +83,7 @@ export default function Pricing() {
             One-time payment, lifetime access
           </p>
           <div className="mt-4 text-4xl font-bold">
-            €50
+            €99.99
             <span className="text-base font-normal text-gray-400">
               /lifetime
             </span>
@@ -88,28 +92,25 @@ export default function Pricing() {
             size="lg"
             className="w-full border-none mt-6 bg-gradient-to-tl from-[#00c6ff] to-[#0072ff] text-white"
           >
-            Get Lifetime Access
+            <Star className="h-4 w-4" />
+            Unlock Lifetime Access
           </Button>
           <ul className="mt-8 space-y-4">
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Everything in Pro Staker
+              Pay once and enjoy unlimited access
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Unlimited stake pools
+              All premium features included
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              Custom staking strategies
+              Priority support and lifetime updates
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle className="text-green-500 h-5 w-5" />
-              API access
-            </li>
-            <li className="flex items-center gap-3">
-              <CheckCircle className="text-green-500 h-5 w-5" />
-              Dedicated account manager
+              Early access to new features forever
             </li>
           </ul>
         </div>

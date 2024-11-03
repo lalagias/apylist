@@ -15,6 +15,7 @@ import Footer from "@/components/landing/footer";
 import FAQ from "@/components/landing/faq";
 import Hero from "@/components/landing/hero";
 import Pricing from "@/components/landing/pricing";
+import CTA from "@/components/landing/cta";
 
 interface Pool {
   symbol: string;
@@ -139,7 +140,12 @@ export default async function Home({
   const maxApy = Number(searchParams.maxApy || 15);
   const minTvl = Number(searchParams.minTvl || 0);
   const maxTvl = Number(searchParams.maxTvl || 0);
-  const riskLevels = searchParams.risk || ["low", "medium", "high", "very high"];
+  const riskLevels = searchParams.risk || [
+    "low",
+    "medium",
+    "high",
+    "very high",
+  ];
   // const _attributes = searchParams.attributes || [];
   // const _categories = searchParams.categories || [];
   const chains = searchParams.chains || [];
@@ -153,29 +159,24 @@ export default async function Home({
           item.provider.toLowerCase().includes(search)
         : true;
 
-      const matchesApy = item.apy >= minApy && 
-        (maxApy === 0 || item.apy <= maxApy);
+      const matchesApy =
+        item.apy >= minApy && (maxApy === 0 || item.apy <= maxApy);
 
-      const matchesTvl = item.tvlUsd >= minTvl && 
-        (maxTvl === 0 || item.tvlUsd <= maxTvl);
+      const matchesTvl =
+        item.tvlUsd >= minTvl && (maxTvl === 0 || item.tvlUsd <= maxTvl);
 
-      const matchesRisk = riskLevels.length === 0 || 
-        riskLevels.includes(item.risk);
+      const matchesRisk =
+        riskLevels.length === 0 || riskLevels.includes(item.risk);
 
-      const matchesChain = chains.length === 0 || 
-        chains.includes(item.chain);
+      const matchesChain = chains.length === 0 || chains.includes(item.chain);
 
       return (
-        matchesSearch &&
-        matchesApy &&
-        matchesTvl &&
-        matchesRisk &&
-        matchesChain
+        matchesSearch && matchesApy && matchesTvl && matchesRisk && matchesChain
       );
     })
     .sort((a: FilteredItem, b: FilteredItem) => {
       const order = sortOrder === "asc" ? 1 : -1;
-      
+
       switch (sortBy) {
         case "apy":
           return (a.apy - b.apy) * order;
@@ -202,86 +203,88 @@ export default async function Home({
       <main className="relative">
         <Hero />
 
-        <div className="flex justify-between items-center mb-4">
-          <Filters data={filteredAndSortedData} />
-        </div>
+        <section id="directory">
+          <div className="flex justify-between items-center mb-4">
+            <Filters data={filteredAndSortedData} />
+          </div>
 
-        <ItemsDisplay items={currentItems} />
+          <ItemsDisplay items={currentItems} />
 
-        <div className="mt-8 mb-16">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                {currentPage > 1 ? (
-                  <PaginationPrevious href={`?page=${currentPage - 1}`} />
-                ) : (
-                  <PaginationPrevious
-                    href={`?page=1`}
-                    className="pointer-events-none opacity-50"
-                  />
+          <div className="mt-8 mb-16">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  {currentPage > 1 ? (
+                    <PaginationPrevious href={`?page=${currentPage - 1}#directory`} />
+                  ) : (
+                    <PaginationPrevious
+                      href={`?page=1#directory`}
+                      className="pointer-events-none opacity-50"
+                    />
+                  )}
+                </PaginationItem>
+
+                {currentPage > 2 && (
+                  <PaginationItem>
+                    <PaginationLink href={`?page=1#directory`}>1</PaginationLink>
+                  </PaginationItem>
                 )}
-              </PaginationItem>
 
-              {currentPage > 2 && (
-                <PaginationItem>
-                  <PaginationLink href={`?page=1`}>1</PaginationLink>
-                </PaginationItem>
-              )}
+                {currentPage > 3 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
 
-              {currentPage > 3 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
+                {[...Array(3)].map((_, i) => {
+                  const pageNumber = currentPage - 1 + i;
+                  if (pageNumber <= 0 || pageNumber > totalPages) return null;
+                  return (
+                    <PaginationItem key={pageNumber}>
+                      <PaginationLink
+                        href={`?page=${pageNumber}#directory`}
+                        isActive={currentPage === pageNumber}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
 
-              {[...Array(3)].map((_, i) => {
-                const pageNumber = currentPage - 1 + i;
-                if (pageNumber <= 0 || pageNumber > totalPages) return null;
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href={`?page=${pageNumber}`}
-                      isActive={currentPage === pageNumber}
-                    >
-                      {pageNumber}
+                {currentPage < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+
+                {currentPage < totalPages - 1 && (
+                  <PaginationItem>
+                    <PaginationLink href={`?page=${totalPages}#directory`}>
+                      {totalPages}
                     </PaginationLink>
                   </PaginationItem>
-                );
-              })}
-
-              {currentPage < totalPages - 2 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-
-              {currentPage < totalPages - 1 && (
-                <PaginationItem>
-                  <PaginationLink href={`?page=${totalPages}`}>
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-
-              <PaginationItem>
-                {currentPage < totalPages ? (
-                  <PaginationNext href={`?page=${currentPage + 1}`} />
-                ) : (
-                  <PaginationNext
-                    href={`?page=${totalPages}`}
-                    className="pointer-events-none opacity-50"
-                  />
                 )}
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
 
-        {currentItems.length === 0 && (
-          <p className="text-center text-gray-500 mt-4">
-            No results found. Try adjusting your filters.
-          </p>
-        )}
+                <PaginationItem>
+                  {currentPage < totalPages ? (
+                    <PaginationNext href={`?page=${currentPage + 1}#directory`} />
+                  ) : (
+                    <PaginationNext
+                      href={`?page=${totalPages}#directory`}
+                      className="pointer-events-none opacity-50"
+                    />
+                  )}
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+
+          {currentItems.length === 0 && (
+            <p className="text-center text-gray-500 mt-4">
+              No results found. Try adjusting your filters.
+            </p>
+          )}
+        </section>
 
         <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto">
           <h3 className="text-4xl font-bold">How APY List Works</h3>
@@ -305,7 +308,7 @@ export default async function Home({
               </CardHeader>
               <CardContent>
                 Our intelligent filtering system allows you to customize your
-                search based on your preferences—whether you’re looking for
+                search based on your preferences—whether you&apos;re looking for
                 specific platforms, terms, or account types (such as crypto or
                 savings). The AI ensures you only see the results that truly
                 matter to you.
@@ -328,6 +331,7 @@ export default async function Home({
 
         <Pricing />
         <FAQ />
+        <CTA />
       </main>
       <Footer />
     </div>
