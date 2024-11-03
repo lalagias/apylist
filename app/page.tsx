@@ -13,6 +13,8 @@ import { ItemsDisplay } from "@/components/directory/items-display";
 import Header from "@/components/landing/header";
 import Footer from "@/components/landing/footer";
 import FAQ from "@/components/landing/faq";
+import Hero from "@/components/landing/hero";
+import Pricing from "@/components/landing/pricing";
 
 interface Pool {
   symbol: string;
@@ -23,6 +25,16 @@ interface Pool {
   tvlUsd: number;
   ilRisk: string;
   exposure: string;
+  apyPct1D: number;
+  apyPct7D: number;
+  apyPct30D: number;
+  predictions: {
+    predictedClass: string;
+    predictedProbability: number;
+    binnedConfidence: number;
+  };
+  apyMean30d: number;
+  volumeUsd7d: number;
 }
 
 async function getDefiRates() {
@@ -38,6 +50,7 @@ async function getDefiRates() {
     const data = await res.json();
 
     const limitedData = data.data;
+    console.log("limitedData", limitedData[1]);
 
     const transformedData = limitedData.map((pool: Pool, index: number) => ({
       id: index + 1,
@@ -50,6 +63,16 @@ async function getDefiRates() {
       tvlUsd: pool.tvlUsd,
       project: pool.project,
       chain: pool.chain,
+      symbol: pool.symbol,
+      apyPct1D: pool.apyPct1D,
+      apyPct7D: pool.apyPct7D,
+      apyPct30D: pool.apyPct30D,
+      stablecoin: pool.stablecoin,
+      ilRisk: pool.ilRisk,
+      exposure: pool.exposure,
+      predictions: pool.predictions,
+      apyMean30d: pool.apyMean30d,
+      volumeUsd7d: pool.volumeUsd7d,
     }));
 
     return transformedData;
@@ -94,48 +117,76 @@ export default async function Home({
   searchParams,
 }: {
   searchParams: {
-    type?: string;
+    search?: string;
     minApy?: string;
     maxApy?: string;
-    minDeposit?: string;
+    minTvl?: string;
+    maxTvl?: string;
     risk?: string[];
+    attributes?: string[];
+    categories?: string[];
     sortBy?: string;
     sortOrder?: string;
+    chains?: string[];
     page?: string;
   };
 }) {
   const allRatesData = await getAllRates();
 
-  const type = searchParams.type || "all";
+  // Extract and parse search params with defaults
+  const search = searchParams.search?.toLowerCase() || "";
   const minApy = Number(searchParams.minApy || 0);
   const maxApy = Number(searchParams.maxApy || 15);
-  const minDeposit = Number(searchParams.minDeposit || 0);
-  const riskLevels = searchParams.risk || [
-    "low",
-    "medium",
-    "high",
-    "very high",
-  ];
+  const minTvl = Number(searchParams.minTvl || 0);
+  const maxTvl = Number(searchParams.maxTvl || 0);
+  const riskLevels = searchParams.risk || ["low", "medium", "high", "very high"];
+  // const _attributes = searchParams.attributes || [];
+  // const _categories = searchParams.categories || [];
+  const chains = searchParams.chains || [];
   const sortBy = searchParams.sortBy || "apy";
   const sortOrder = searchParams.sortOrder || "desc";
 
   const filteredAndSortedData = allRatesData
-    .filter(
-      (item: FilteredItem) =>
-        (type === "all" || item.type === type) &&
-        item.apy >= minApy &&
-        item.apy <= maxApy &&
-        (Array.isArray(riskLevels) ? riskLevels.includes(item.risk) : true) &&
-        item.minDeposit >= minDeposit
-    )
+    .filter((item: FilteredItem) => {
+      const matchesSearch = search
+        ? item.name.toLowerCase().includes(search) ||
+          item.provider.toLowerCase().includes(search)
+        : true;
+
+      const matchesApy = item.apy >= minApy && 
+        (maxApy === 0 || item.apy <= maxApy);
+
+      const matchesTvl = item.tvlUsd >= minTvl && 
+        (maxTvl === 0 || item.tvlUsd <= maxTvl);
+
+      const matchesRisk = riskLevels.length === 0 || 
+        riskLevels.includes(item.risk);
+
+      const matchesChain = chains.length === 0 || 
+        chains.includes(item.chain);
+
+      return (
+        matchesSearch &&
+        matchesApy &&
+        matchesTvl &&
+        matchesRisk &&
+        matchesChain
+      );
+    })
     .sort((a: FilteredItem, b: FilteredItem) => {
       const order = sortOrder === "asc" ? 1 : -1;
-      if (sortBy === "apy") return (a.apy - b.apy) * order;
-      if (sortBy === "minDeposit") return (a.minDeposit - b.minDeposit) * order;
-      return a.name.localeCompare(b.name) * order;
+      
+      switch (sortBy) {
+        case "apy":
+          return (a.apy - b.apy) * order;
+        case "tvl":
+          return (a.tvlUsd - b.tvlUsd) * order;
+        default:
+          return a.name.localeCompare(b.name) * order;
+      }
     });
 
-  const itemsPerPage = 20;
+  const itemsPerPage = 21;
   const currentPage = Number(searchParams.page) || 1;
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -149,6 +200,8 @@ export default async function Home({
     <div className="flex flex-col min-h-screen max-w-6xl mx-auto">
       <Header />
       <main className="relative">
+        <Hero />
+
         <div className="flex justify-between items-center mb-4">
           <Filters data={filteredAndSortedData} />
         </div>
@@ -272,6 +325,8 @@ export default async function Home({
             </Card>
           </div>
         </section>
+
+        <Pricing />
         <FAQ />
       </main>
       <Footer />

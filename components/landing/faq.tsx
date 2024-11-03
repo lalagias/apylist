@@ -30,7 +30,7 @@ const faqs = [
 
 export default function FAQ() {
   return (
-    <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto">
+    <section className="h-screen flex flex-col gap-8 items-center justify-center p-10 max-w-7xl mx-auto" id="faq">
       <h3 className="text-6xl font-bold text-center">
         Frequently Asked Questions (FAQ)
       </h3>

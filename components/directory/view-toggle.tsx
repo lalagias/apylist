@@ -12,14 +12,16 @@ export function ViewToggle() {
       <Button
         onClick={() => setViewMode("grid")}
         variant={viewMode === "grid" ? "default" : "outline"}
-        className="disabled:pointer-events-none disabled:opacity-50 h-10 w-10"
+        className="disabled:pointer-events-none disabled:opacity-50"
+        size="icon"
       >
         <LayoutGrid className="h-4 w-4" />
       </Button>
       <Button
         onClick={() => setViewMode("list")}
         variant={viewMode === "list" ? "default" : "outline"}
-        className="disabled:pointer-events-none disabled:opacity-50 h-10 w-10"
+        className="disabled:pointer-events-none disabled:opacity-50"
+        size="icon"
       >
         <List className="h-4 w-4" />
       </Button>

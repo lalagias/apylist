@@ -1,8 +1,20 @@
 import React from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function PrivacyPolicy() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <Button asChild>
+        <Link
+          href="/"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          Back to Home
+        </Link>
+      </Button>
+
       <h1 className="text-3xl font-bold mb-8 text-center">Privacy Policy</h1>
 
       <section className="mb-8">

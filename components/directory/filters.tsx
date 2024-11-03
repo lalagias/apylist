@@ -35,7 +35,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronsUpDown, Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ViewToggle } from "@/components/directory/view-toggle";
 import { FilteredItem } from "@/types/data";
@@ -132,7 +132,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
             control={form.control}
             name="search"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormControl>
                   <div className="relative">
                     <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -140,7 +140,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
                       type="text"
                       placeholder="Search by token name..."
                       {...field}
-                      className="pl-8"
+                      className="pl-8 w-full"
                     />
                   </div>
                 </FormControl>
@@ -148,18 +148,20 @@ export function Filters({ data }: { data: FilteredItem[] }) {
             )}
           />
 
-          <div className="flex items-center gap-4 mb-4">
+          <div className="grid grid-cols-8 gap-4 mb-4 w-full">
             <FormField
               control={form.control}
               name="minApy"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-[200px] justify-between">
-                          APY
-                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                        <Button variant="outline" className="w-full justify-between text-muted-foreground">
+                          {field.value === 0 && form.getValues("maxApy") === 15
+                            ? "APY"
+                            : `APY: ${field.value}-${form.getValues("maxApy")}%`}
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
@@ -208,13 +210,15 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="minTvl"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-[200px] justify-between">
-                          TVL
-                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                        <Button variant="outline" className="w-full justify-between text-muted-foreground">
+                          {field.value === 0 && form.getValues("maxTvl") === 0
+                            ? "TVL"
+                            : `TVL: ${field.value}-${form.getValues("maxTvl")}`}
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
@@ -263,7 +267,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="risk"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col w-full">
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -278,7 +282,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
                           {field.value?.length
                             ? `${field.value.length} selected`
                             : "Risk Level"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -344,7 +348,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="attributes"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col w-full">
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -359,7 +363,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
                           {field.value?.length
                             ? `${field.value.length} selected`
                             : "Attributes"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -423,7 +427,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="categories"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col w-full">
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -438,7 +442,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
                           {field.value?.length
                             ? `${field.value.length} selected`
                             : "Categories"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -503,10 +507,10 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="sortBy"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-muted-foreground">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
                     </FormControl>
@@ -523,10 +527,10 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="sortOrder"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-muted-foreground">
                         <SelectValue placeholder="Sort order" />
                       </SelectTrigger>
                     </FormControl>
@@ -543,7 +547,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
               control={form.control}
               name="chains"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col w-full">
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -558,7 +562,7 @@ export function Filters({ data }: { data: FilteredItem[] }) {
                           {field.value?.length
                             ? `${field.value.length} selected`
                             : "Chains"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>

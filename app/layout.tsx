@@ -3,6 +3,7 @@ import "./globals.css";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import CookiesDialog from "@/components/cookies-dialog";
 
 export const metadata: Metadata = {
   title: "APY List",
@@ -27,6 +28,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <CookiesDialog />
         </ThemeProvider>
       </body>
     </html>
